@@ -1,5 +1,5 @@
 {"name": "dominic", "age": 22, "eye_color": "brown", "salary": 100000, "state": "FL"},
-("name": "Noelle","age": 21,"eye_color": "brown", "salary": 1000000,"state": "FL"},
+("name": "Noelle","age": 21,"eye_color": "brown", "salary": 1200000000,"state": "FL"},
 ("name": "daimon","age": 23,"eye_color": "brown","salary": 60000,"state": "CT"},
 ("name": "fioNa","age": 23,"eye_color": "blue","salary": 1000,"state": "RI"},
 ("name": "Tania","age": 31,"eye_color": "brown","salary": 10000000,"state": "GA"},
