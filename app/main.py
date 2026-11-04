@@ -24,7 +24,7 @@ app = FastAPI()
 
 with open('models/random_forest_stroke.joblib', 'rb') as f:
     model = joblib.load(f)
-    
+
 @app.get("/")
 async def root():
     return {"Message": "Hello World"}
