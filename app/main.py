@@ -24,10 +24,10 @@ app = FastAPI()
 
 with open('models/random_forest_stroke.joblib', 'rb') as f:
     model = joblib.load(f)
-
+    
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"Message": "Hello World"}
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
