@@ -35,3 +35,9 @@ models/*.pkl
 
 # OS specific files
 .DS_Store
+
+# Ensuring we keep uv lock
+!uv.lock
+
+# Ignore uv lock
+poetry.lock
