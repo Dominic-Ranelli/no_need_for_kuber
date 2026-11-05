@@ -1,3 +1,4 @@
+import yaml
 import numpy as np
 import pandas as pd
 import joblib
@@ -18,7 +19,7 @@ from sklearn.metrics import (
     f1_score,
     roc_auc_score,
     classification_report,
-    confusion_matrix
+    confusion_matrix,
 )
 
 
@@ -26,23 +27,19 @@ from sklearn.metrics import (
 # 1. Load and clean data
 # ============================================================
 
-DATA_PATH = Path("data/raw_data.csv")
-MODEL_PATH = Path("models/random_forest_stroke.joblib")
+with open("CONFIGS.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
+DATA_PATH = Path(config["data_path"])
+MODEL_PATH = Path(config["model_path"])
 
 df = pd.read_csv(DATA_PATH)
 
 # Normalize column capitalization.
-df.rename(
-    columns={"Residence_type": "residence_type"},
-    inplace=True
-)
+df.rename(columns={"Residence_type": "residence_type"}, inplace=True)
 
 # Drop unnecessary columns if they exist.
-df.drop(
-    columns=["id"],
-    errors="ignore",
-    inplace=True
-)
+df.drop(columns=["id"], errors="ignore", inplace=True)
 
 # Convert BMI to numeric; invalid values become NaN.
 df["bmi"] = pd.to_numeric(df["bmi"], errors="coerce")
@@ -69,18 +66,14 @@ X = df.drop(columns=["stroke"])
 y = df["stroke"]
 
 # Define feature groups.
-numerical_cols = [
-    "age",
-    "avg_glucose_level",
-    "bmi"
-]
+numerical_cols = ["age", "avg_glucose_level", "bmi"]
 
 categorical_cols = [
     "gender",
     "work_type",
     "ever_married",
     "residence_type",
-    "smoking_status"
+    "smoking_status",
 ]
 
 # Validate the expected input schema.
@@ -89,9 +82,7 @@ expected_cols = numerical_cols + categorical_cols
 missing_cols = set(expected_cols) - set(X.columns)
 
 if missing_cols:
-    raise ValueError(
-        f"Missing expected feature columns: {missing_cols}"
-    )
+    raise ValueError(f"Missing expected feature columns: {missing_cols}")
 
 # Retain only the intended model features.
 X = X[expected_cols]
@@ -102,11 +93,7 @@ X = X[expected_cols]
 # ============================================================
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 print("\nData split complete.")
@@ -120,48 +107,22 @@ print(f"Testing samples:  {len(X_test)}")
 
 # Numerical features:
 # Replace missing values with the training-set median.
-numerical_transformer = Pipeline(
-    steps=[
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        )
-    ]
-)
+numerical_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median"))])
 
 # Categorical features:
 # Replace missing values and one-hot encode categories.
 categorical_transformer = Pipeline(
     steps=[
-        (
-            "imputer",
-            SimpleImputer(
-                strategy="constant",
-                fill_value="missing"
-            )
-        ),
-        (
-            "onehot",
-            OneHotEncoder(
-                handle_unknown="ignore"
-            )
-        )
+        ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore")),
     ]
 )
 
 # Combine numerical and categorical preprocessing.
 preprocessor = ColumnTransformer(
     transformers=[
-        (
-            "num",
-            numerical_transformer,
-            numerical_cols
-        ),
-        (
-            "cat",
-            categorical_transformer,
-            categorical_cols
-        )
+        ("num", numerical_transformer, numerical_cols),
+        ("cat", categorical_transformer, categorical_cols),
     ]
 )
 
@@ -178,7 +139,7 @@ random_forest = RandomForestClassifier(
     max_features="sqrt",
     class_weight="balanced",
     random_state=42,
-    n_jobs=-1
+    n_jobs=-1,
 )
 
 
@@ -186,12 +147,7 @@ random_forest = RandomForestClassifier(
 # 6. Combine preprocessing and model into one pipeline
 # ============================================================
 
-model = Pipeline(
-    steps=[
-        ("preprocessor", preprocessor),
-        ("classifier", random_forest)
-    ]
-)
+model = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", random_forest)])
 
 
 # ============================================================
@@ -216,9 +172,7 @@ y_proba = model.predict_proba(X_test)
 
 # Locate the probability column corresponding to stroke = 1.
 classifier = model.named_steps["classifier"]
-positive_class_index = np.where(
-    classifier.classes_ == 1
-)[0][0]
+positive_class_index = np.where(classifier.classes_ == 1)[0][0]
 
 stroke_probabilities = y_proba[:, positive_class_index]
 
@@ -229,31 +183,13 @@ stroke_probabilities = y_proba[:, positive_class_index]
 
 accuracy = accuracy_score(y_test, y_pred)
 
-precision = precision_score(
-    y_test,
-    y_pred,
-    pos_label=1,
-    zero_division=0
-)
+precision = precision_score(y_test, y_pred, pos_label=1, zero_division=0)
 
-recall = recall_score(
-    y_test,
-    y_pred,
-    pos_label=1,
-    zero_division=0
-)
+recall = recall_score(y_test, y_pred, pos_label=1, zero_division=0)
 
-f1 = f1_score(
-    y_test,
-    y_pred,
-    pos_label=1,
-    zero_division=0
-)
+f1 = f1_score(y_test, y_pred, pos_label=1, zero_division=0)
 
-roc_auc = roc_auc_score(
-    y_test,
-    stroke_probabilities
-)
+roc_auc = roc_auc_score(y_test, stroke_probabilities)
 
 print("\n" + "=" * 50)
 print("RANDOM FOREST EVALUATION")
@@ -266,13 +202,7 @@ print(f"F1-score:  {f1:.4f}")
 print(f"ROC-AUC:   {roc_auc:.4f}")
 
 print("\nClassification Report:")
-print(
-    classification_report(
-        y_test,
-        y_pred,
-        zero_division=0
-    )
-)
+print(classification_report(y_test, y_pred, zero_division=0))
 
 print("Confusion Matrix:")
 print(confusion_matrix(y_test, y_pred))
@@ -282,25 +212,15 @@ print(confusion_matrix(y_test, y_pred))
 # 10. Display feature importances
 # ============================================================
 
-feature_names = (
-    model.named_steps["preprocessor"]
-    .get_feature_names_out()
+feature_names = model.named_steps["preprocessor"].get_feature_names_out()
+
+feature_importances = model.named_steps["classifier"].feature_importances_
+
+importance_df = pd.DataFrame(
+    {"feature": feature_names, "importance": feature_importances}
 )
 
-feature_importances = (
-    model.named_steps["classifier"]
-    .feature_importances_
-)
-
-importance_df = pd.DataFrame({
-    "feature": feature_names,
-    "importance": feature_importances
-})
-
-importance_df = importance_df.sort_values(
-    by="importance",
-    ascending=False
-)
+importance_df = importance_df.sort_values(by="importance", ascending=False)
 
 print("\nTop 15 Feature Importances:")
 print(importance_df.head(15).to_string(index=False))
@@ -310,10 +230,7 @@ print(importance_df.head(15).to_string(index=False))
 # 11. Save the complete trained pipeline
 # ============================================================
 
-MODEL_PATH.parent.mkdir(
-    parents=True,
-    exist_ok=True
-)
+MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 joblib.dump(model, MODEL_PATH)
 

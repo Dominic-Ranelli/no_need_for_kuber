@@ -1,3 +1,13 @@
 Hello World! 
 
 I have not yet setup the toml file. I will do that now.
+
+Something interesting I learned in general upkeep, when making changes to code, I should run:
+For tests:
+PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing
+
+For uv:
+uv sync
+
+For code quality:
+uv run ruff format

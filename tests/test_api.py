@@ -5,17 +5,20 @@ from app.main import app
 
 client = TestClient(app)
 
+
 # Testing root
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"Message": "Hello World"}
 
+
 # Testing health returns healthy
 def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"Status": "Healthy"}
+
 
 # Testing the input missing a required field
 def test_predict_missing_field_validation():
@@ -27,12 +30,13 @@ def test_predict_missing_field_validation():
         "work_type": "Private",
         "ever_married": "Yes",
         "residence_type": "Urban",
-        "smoking_status": "formerly smoked"
+        "smoking_status": "formerly smoked",
     }
     del payload["age"]
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 422
+
 
 # Testing the input provides a perfect input
 def test_predict_no_missing_field_validation():
@@ -44,11 +48,12 @@ def test_predict_no_missing_field_validation():
         "work_type": "Private",
         "ever_married": "Yes",
         "residence_type": "Urban",
-        "smoking_status": "formerly smoked"
+        "smoking_status": "formerly smoked",
     }
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
+
 
 # Testing incorrect field type
 def test_predict_invalid_data_types():
@@ -60,11 +65,12 @@ def test_predict_invalid_data_types():
         "work_type": "Private",
         "ever_married": "Yes",
         "residence_type": "Urban",
-        "smoking_status": "never smoked"
+        "smoking_status": "never smoked",
     }
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 422
+
 
 # Testing invalid business value
 def test_predict_invalid_business_type():
@@ -76,7 +82,7 @@ def test_predict_invalid_business_type():
         "work_type": "Private",
         "ever_married": "Yes",
         "residence_type": "Urban",
-        "smoking_status": "never smoked"
+        "smoking_status": "never smoked",
     }
 
     response = client.post("/predict", json=payload)
@@ -84,6 +90,7 @@ def test_predict_invalid_business_type():
 
     error_detail = response.json()["detail"]
     assert any("avg_glucose_level" in err["loc"] for err in error_detail)
+
 
 # Ensure columns are ordered correctly
 @patch("app.main.model")
@@ -102,21 +109,27 @@ def test_predict_column_ordering(mock_get_version, mock_model):
         "ever_married": "No",
         "gender": "Male",
         "avg_glucose_level": 85.2,
-        "work_type": "Private"
+        "work_type": "Private",
     }
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
-    
+
     called_df = mock_model.predict.call_args[0][0]
-    
+
     expected_cols = [
-        "age", "avg_glucose_level", "bmi",
-        "gender", "work_type", "ever_married",
-        "residence_type", "smoking_status"
+        "age",
+        "avg_glucose_level",
+        "bmi",
+        "gender",
+        "work_type",
+        "ever_married",
+        "residence_type",
+        "smoking_status",
     ]
-    
+
     assert list(called_df.columns) == expected_cols
+
 
 @patch("app.main.model")
 @patch("app.main.get_version")
@@ -135,13 +148,13 @@ def test_predict_stroke_success(mock_get_version, mock_model):
         "work_type": "Self-employed",
         "ever_married": "Yes",
         "residence_type": "Rural",
-        "smoking_status": "smokes"
+        "smoking_status": "smokes",
     }
-
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
     assert response.json() == ["Predicted class is Stroke", "Version 1"]
+
 
 @patch("app.main.model")
 @patch("app.main.get_version")
@@ -160,7 +173,7 @@ def test_predict_non_stroke_success(mock_get_version, mock_model):
         "work_type": "Private",
         "ever_married": "No",
         "residence_type": "Urban",
-        "smoking_status": "never smoked"
+        "smoking_status": "never smoked",
     }
 
     response = client.post("/predict", json=payload)
@@ -184,7 +197,7 @@ def test_predict_model_exception(mock_get_version, mock_model):
         "work_type": "Private",
         "ever_married": "No",
         "residence_type": "Urban",
-        "smoking_status": "never smoked"
+        "smoking_status": "never smoked",
     }
 
     response = client.post("/predict", json=payload)

@@ -1,4 +1,5 @@
-import json 
+import json
+
 
 def fetch_pred_record(input):
     age = input.age
