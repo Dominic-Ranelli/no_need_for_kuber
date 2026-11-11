@@ -23,9 +23,9 @@ from sklearn.metrics import (
 )
 
 
-# ============================================================
-# 1. Load and clean data
-# ============================================================
+
+# Load and clean data
+
 
 with open("CONFIGS.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -35,19 +35,19 @@ MODEL_PATH = Path(config["model_path"])
 
 df = pd.read_csv(DATA_PATH)
 
-# Normalize column capitalization.
+# Normalize column capitalization
 df.rename(columns={"Residence_type": "residence_type"}, inplace=True)
 
-# Drop unnecessary columns if they exist.
+# Drop unnecessary columns if they exist
 df.drop(columns=["id"], errors="ignore", inplace=True)
 
-# Convert BMI to numeric; invalid values become NaN.
+# Convert BMI to numeric; invalid values become NaN
 df["bmi"] = pd.to_numeric(df["bmi"], errors="coerce")
 
-# Remove rows without a target label.
+# Remove rows without a target label
 df.dropna(subset=["stroke"], inplace=True)
 
-# Display dataset information.
+# Display dataset information
 print("\nDataset information:")
 print(df.info())
 
@@ -58,14 +58,14 @@ print("\nTarget proportions:")
 print(df["stroke"].value_counts(normalize=True))
 
 
-# ============================================================
-# 2. Separate features and target
-# ============================================================
+
+# Separate features and target
+
 
 X = df.drop(columns=["stroke"])
 y = df["stroke"]
 
-# Define feature groups.
+# Define feature groups
 numerical_cols = ["age", "avg_glucose_level", "bmi"]
 
 categorical_cols = [
@@ -76,7 +76,7 @@ categorical_cols = [
     "smoking_status",
 ]
 
-# Validate the expected input schema.
+# Validate the expected input schema
 expected_cols = numerical_cols + categorical_cols
 
 missing_cols = set(expected_cols) - set(X.columns)
@@ -84,13 +84,13 @@ missing_cols = set(expected_cols) - set(X.columns)
 if missing_cols:
     raise ValueError(f"Missing expected feature columns: {missing_cols}")
 
-# Retain only the intended model features.
+# Retain only the intended model features
 X = X[expected_cols]
 
 
-# ============================================================
-# 3. Split into training and testing sets
-# ============================================================
+
+# Split into training and testing sets
+
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
@@ -101,16 +101,16 @@ print(f"Training samples: {len(X_train)}")
 print(f"Testing samples:  {len(X_test)}")
 
 
-# ============================================================
-# 4. Define preprocessing pipelines
-# ============================================================
+
+# Define preprocessing pipelines
+
 
 # Numerical features:
-# Replace missing values with the training-set median.
+# Replace missing values with the training-set median
 numerical_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median"))])
 
 # Categorical features:
-# Replace missing values and one-hot encode categories.
+# Replace missing values and one-hot encode categories
 categorical_transformer = Pipeline(
     steps=[
         ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
@@ -118,7 +118,7 @@ categorical_transformer = Pipeline(
     ]
 )
 
-# Combine numerical and categorical preprocessing.
+# Combine numerical and categorical preprocessing
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", numerical_transformer, numerical_cols),
@@ -127,9 +127,9 @@ preprocessor = ColumnTransformer(
 )
 
 
-# ============================================================
-# 5. Define the Random Forest model
-# ============================================================
+
+# Define the Random Forest model
+
 
 random_forest = RandomForestClassifier(
     n_estimators=300,
@@ -143,16 +143,16 @@ random_forest = RandomForestClassifier(
 )
 
 
-# ============================================================
-# 6. Combine preprocessing and model into one pipeline
-# ============================================================
+
+# Combine preprocessing and model into one pipeline
+
 
 model = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", random_forest)])
 
 
-# ============================================================
-# 7. Train the model
-# ============================================================
+
+# Train the model
+
 
 print("\nTraining Random Forest...")
 
@@ -161,25 +161,25 @@ model.fit(X_train, y_train)
 print("Training complete!")
 
 
-# ============================================================
-# 8. Generate predictions
-# ============================================================
+
+# Generate predictions
+
 
 y_pred = model.predict(X_test)
 
-# Probability that each test sample belongs to class 1.
+# Probability that each test sample belongs to class 1
 y_proba = model.predict_proba(X_test)
 
-# Locate the probability column corresponding to stroke = 1.
+# Locate the probability column corresponding to stroke = 1
 classifier = model.named_steps["classifier"]
 positive_class_index = np.where(classifier.classes_ == 1)[0][0]
 
 stroke_probabilities = y_proba[:, positive_class_index]
 
 
-# ============================================================
-# 9. Evaluate model performance
-# ============================================================
+
+# Evaluate model performance
+
 
 accuracy = accuracy_score(y_test, y_pred)
 
@@ -208,9 +208,9 @@ print("Confusion Matrix:")
 print(confusion_matrix(y_test, y_pred))
 
 
-# ============================================================
-# 10. Display feature importances
-# ============================================================
+
+# Display feature importances
+
 
 feature_names = model.named_steps["preprocessor"].get_feature_names_out()
 
@@ -226,9 +226,9 @@ print("\nTop 15 Feature Importances:")
 print(importance_df.head(15).to_string(index=False))
 
 
-# ============================================================
-# 11. Save the complete trained pipeline
-# ============================================================
+
+# Save the complete trained pipeline
+
 
 MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
