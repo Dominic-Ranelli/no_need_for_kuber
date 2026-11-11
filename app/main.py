@@ -11,6 +11,39 @@ from time import perf_counter
 import time
 
 
+# Startup validation helper
+def validate_artifact():
+    with open("CONFIGS.yaml", "r") as f:
+        config = yaml.safe_load(f)
+
+    model_path = Path(config["model_path"])
+
+    if not model_path.is_file():
+        raise RuntimeError(f"Model artifact not found at expected path: {model_path}")
+
+    try:
+         _ = joblib.load(model_path)
+    except Exception as exc:
+        raise RuntimeError(f"Failed to load model artifact at {model_path}: {exc}")
+
+
+
+app = FastAPI()
+
+
+load_time_start = time.perf_counter()
+with open("CONFIGS.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
+
+@app.on_event("startup")
+def on_startup():
+    validate_artifact()
+
+model_path = Path(config["model_path"])
+
+model = joblib.load(model_path)
+load_time_end = time.perf_counter()
 
 class Input(BaseModel):
     gender: Literal["Male", "Female", "Other"]
@@ -21,21 +54,6 @@ class Input(BaseModel):
     ever_married: Literal["Yes", "No"]
     residence_type: Literal["Urban", "Rural"]
     smoking_status: str
-
-app = FastAPI()
-
-
-load_time_start = time.perf_counter()
-with open("CONFIGS.yaml", "r") as f:
-    config = yaml.safe_load(f)
-
-
-
-model_path = Path(config["model_path"])
-
-model = joblib.load(model_path)
-load_time_end = time.perf_counter()
-
 
 @app.get("/")
 async def root():

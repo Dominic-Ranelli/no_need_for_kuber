@@ -17,8 +17,10 @@ client = TestClient(app)
 # Variable for times
 times = []
 
+load_time_start = time.perf_counter()
 with open("CONFIGS.yaml", "r") as f:
     config = yaml.safe_load(f)
+load_time_end = time.perf_counter()
 
 # Define payload before creating the DataFrame
 payload = {
@@ -63,4 +65,4 @@ for i in range(100):
 p_50 = np.percentile(times, 50)
 p_95 = np.percentile(times, 95)
 
-print(f"p50 latency = {p_50} milliseconds. p95 latency = {p_95} milliseconds")
+print(f"Load time = {(load_time_end-load_time_start)*1000} milliseconds. p50 latency = {p_50} milliseconds. p95 latency = {p_95} milliseconds")
