@@ -6,6 +6,9 @@ Something interesting I learned in general upkeep, when making changes to code, 
 For tests:
 PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing
 
+For testing latency:
+PYTHONPATH=. uv run python tests/test_latency.py
+
 For uv:
 uv sync
 

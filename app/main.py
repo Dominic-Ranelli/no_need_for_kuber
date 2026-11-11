@@ -7,6 +7,9 @@ from typing import Literal
 import pandas as pd
 import joblib
 import numpy as np
+from time import perf_counter
+import time
+
 
 
 class Input(BaseModel):
@@ -19,21 +22,29 @@ class Input(BaseModel):
     residence_type: Literal["Urban", "Rural"]
     smoking_status: str
 
-
 app = FastAPI()
 
+
+load_time_start = time.perf_counter()
 with open("CONFIGS.yaml", "r") as f:
     config = yaml.safe_load(f)
+
 
 
 model_path = Path(config["model_path"])
 
 model = joblib.load(model_path)
+load_time_end = time.perf_counter()
 
 
 @app.get("/")
 async def root():
     return {"Message": "Hello World"}
+
+# Adding load time request
+@app.get("/load")
+async def load_time(start = load_time_start, end = load_time_end):
+    return {"Load time of model:": f"{(end - start)*1000} milliseconds"}
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -65,8 +76,10 @@ def post_prediction(input: Input):
     input_df = input_df[expected_cols]
 
     # Make prediction
+    run_time_start = time.perf_counter()
     predicted_class = model.predict(input_df)
+    run_time_end = time.perf_counter()
 
     stroke_dict = {0: "Non-stroke", 1: "Stroke"}
 
-    return [f"Predicted class is {stroke_dict[predicted_class.item()]}", get_version()]
+    return [f"Predicted class is {stroke_dict[predicted_class.item()]}", f"Ran in {(run_time_end-run_time_start)*1000} milliseconds"]
