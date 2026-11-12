@@ -23,7 +23,6 @@ from sklearn.metrics import (
 )
 
 
-
 # Load and clean data
 
 
@@ -58,7 +57,6 @@ print("\nTarget proportions:")
 print(df["stroke"].value_counts(normalize=True))
 
 
-
 # Separate features and target
 
 
@@ -88,7 +86,6 @@ if missing_cols:
 X = X[expected_cols]
 
 
-
 # Split into training and testing sets
 
 
@@ -99,7 +96,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 print("\nData split complete.")
 print(f"Training samples: {len(X_train)}")
 print(f"Testing samples:  {len(X_test)}")
-
 
 
 # Define preprocessing pipelines
@@ -127,7 +123,6 @@ preprocessor = ColumnTransformer(
 )
 
 
-
 # Define the Random Forest model
 
 
@@ -143,12 +138,10 @@ random_forest = RandomForestClassifier(
 )
 
 
-
 # Combine preprocessing and model into one pipeline
 
 
 model = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", random_forest)])
-
 
 
 # Train the model
@@ -159,7 +152,6 @@ print("\nTraining Random Forest...")
 model.fit(X_train, y_train)
 
 print("Training complete!")
-
 
 
 # Generate predictions
@@ -175,7 +167,6 @@ classifier = model.named_steps["classifier"]
 positive_class_index = np.where(classifier.classes_ == 1)[0][0]
 
 stroke_probabilities = y_proba[:, positive_class_index]
-
 
 
 # Evaluate model performance
@@ -208,7 +199,6 @@ print("Confusion Matrix:")
 print(confusion_matrix(y_test, y_pred))
 
 
-
 # Display feature importances
 
 
@@ -224,7 +214,6 @@ importance_df = importance_df.sort_values(by="importance", ascending=False)
 
 print("\nTop 15 Feature Importances:")
 print(importance_df.head(15).to_string(index=False))
-
 
 
 # Save the complete trained pipeline

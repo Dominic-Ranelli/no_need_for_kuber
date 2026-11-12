@@ -65,4 +65,6 @@ for i in range(100):
 p_50 = np.percentile(times, 50)
 p_95 = np.percentile(times, 95)
 
-print(f"Load time = {(load_time_end-load_time_start)*1000} milliseconds. p50 latency = {p_50} milliseconds. p95 latency = {p_95} milliseconds")
+print(
+    f"Load time = {round((load_time_end - load_time_start) * 1000, 2)} milliseconds. p50 latency = {round(p_50, 2)} milliseconds. p95 latency = {round(p_95, 2)} milliseconds"
+)
