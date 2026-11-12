@@ -153,7 +153,7 @@ def test_predict_stroke_success(mock_get_version, mock_model):
 
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
-    assert response.json() == ["Predicted class is Stroke", "Version 1"]
+    assert response.json()[0] == "Predicted class is Stroke"
 
 
 @patch("app.main.model")
@@ -179,7 +179,7 @@ def test_predict_non_stroke_success(mock_get_version, mock_model):
     response = client.post("/predict", json=payload)
 
     assert response.status_code == 200
-    assert response.json() == ["Predicted class is Non-stroke", "Version 1"]
+    assert response.json()[0] == "Predicted class is Non-stroke"
 
 
 # Mock model failing

@@ -9,6 +9,12 @@ PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing
 For testing latency:
 PYTHONPATH=. uv run python tests/test_latency.py
 
+To catch mismatches:
+mypy app/main.py
+
+To update uv:
+uv self update
+
 For uv:
 uv sync
 
