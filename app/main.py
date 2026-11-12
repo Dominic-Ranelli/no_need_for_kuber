@@ -1,3 +1,6 @@
+import logging 
+import uuid
+from contextvars import ContextVar
 from pathlib import Path
 import yaml
 from fastapi import FastAPI, status
@@ -10,6 +13,23 @@ import numpy as np
 from time import perf_counter
 import time
 
+# Context Var for request ID
+request_id_var: ContextVar[str] = ContextVar("request_id", default = "-")
+
+# Logging filter
+class RequestIdFilter(logging.Filter):
+    def filter(self, record):
+        record.request_id = request_id_var.get()
+        return True
+
+# Logging format
+logging.basicConfig(
+    level = logging.INFO,
+    format="%(asctime)s [%(levelname)s] [ReqID: %(request_id)s] %(name)s: %(message)s"
+    )
+
+logger = logging.getLogger(__name__)
+logger.addFilter(RequestIdFilter())
 
 # Startup validation helper
 def validate_artifact():
@@ -72,11 +92,14 @@ def get_health():
 
 @app.get("/version")
 def get_version():
+    logger.info(f"Received version requst...")
     return {"Model version": "1.0.0"}
 
 
 @app.post("/predict")
 def post_prediction(input: Input):
+    # Logging info
+    logger.info(f"Received prediction request for input payload: {input.dict()}")
     # Construct dataframe
     input_df = pd.DataFrame([input.dict()])
 
@@ -97,7 +120,13 @@ def post_prediction(input: Input):
     run_time_start = time.perf_counter()
     predicted_class = model.predict(input_df)
     run_time_end = time.perf_counter()
-
+    
+    # Adding better outputs
     stroke_dict = {0: "Non-stroke", 1: "Stroke"}
+    result_class = stroke_dict[predicted_class.item()]
+    duration_ms = (run_time_end - run_time_start) * 1000
 
-    return [f"Predicted class is {stroke_dict[predicted_class.item()]}", f"Ran in {(run_time_end-run_time_start)*1000} milliseconds"]
+    # Logs
+    logger.info(f"Prediction successful: {result_class} (Inference time: {duration_ms:.2f} ms)")
+
+    return [f"Predicted class is {result_class}", f"Ran in {round(duration_ms, 2)} milliseconds"]
