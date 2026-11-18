@@ -156,6 +156,7 @@ def test_predict_stroke_success(mock_get_version, mock_model):
     assert response.json()[0] == "Predicted class is Stroke"
 
 
+
 @patch("app.main.model")
 @patch("app.main.get_version")
 # Testing stroke failure
