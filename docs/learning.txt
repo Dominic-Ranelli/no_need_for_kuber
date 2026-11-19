@@ -5,6 +5,13 @@ I have not yet setup the toml file. I will do that now.
 Something interesting I learned in general upkeep, when making changes to code, I should run:
 Running on docker:
 docker build --no-cache -t myimage -f docker/Dockerfile .
+docker run -p 8080:80 myimage
+
+Update requirements:
+uv pip compile pyproject.toml -o requirements.txt --generate-hashes
+
+View build steps:
+docker build --progress=plain -f docker/Dockerfile .
 
 For tests:
 PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing

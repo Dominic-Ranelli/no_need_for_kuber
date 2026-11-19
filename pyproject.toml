@@ -15,6 +15,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "pandas>=2.3.3",
     "toml-cli>=0.8.2",
+    "pymupdf",
 ]
 
 [project.optional-dependencies]
