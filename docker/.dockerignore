@@ -1,0 +1,7 @@
+# .dockerignore
+
+/docs
+/ml_inference_platform
+/tests
+LICENSE
+README.md

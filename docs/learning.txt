@@ -4,7 +4,7 @@ I have not yet setup the toml file. I will do that now.
 
 Something interesting I learned in general upkeep, when making changes to code, I should run:
 Running on docker:
-docker run -p 8080:80 myimage
+docker build --no-cache -t myimage -f docker/Dockerfile .
 
 For tests:
 PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing
