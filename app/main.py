@@ -1,4 +1,5 @@
 import logging
+import pymupdf
 import uuid
 from contextvars import ContextVar
 from pathlib import Path
@@ -155,7 +156,7 @@ def post_prediction(input: Input):
     run_time_end = time.perf_counter()
 
     # Adding better outputs
-    stroke_dict = {0: "Non-stroke", 1: "Stroke"}
+    stroke_dict = {0: "Non-stroke!", 1: "Stroke!"}
     result_class = stroke_dict[predicted_class.item()]
     duration_ms = (run_time_end - run_time_start) * 1000
 
