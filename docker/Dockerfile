@@ -4,7 +4,7 @@ FROM python:3.11-slim AS builder
 
 # Env variables
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONDONTWRITEBYTECODE=1 
 
 WORKDIR /build
 
@@ -23,9 +23,9 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT = 80
+    PORT=80
 
-WORKDIR = /code
+WORKDIR /code
 
 COPY --from=builder /build/wheels /wheels
 RUN pip install --no-cache-dir --no-index  --find-links=/wheels /wheels/* \
