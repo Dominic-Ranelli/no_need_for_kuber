@@ -1,12 +1,12 @@
+# Stage 1: Dependencies:
 # Version
-FROM python:3.11-slim
+FROM python:3.11-slim AS builder
 
 # Env variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=80
 
-WORKDIR /code
+WORKDIR /build
 
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -15,7 +15,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Python dependencies
 COPY ./requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip wheel --wheel-dir=/build/wheels -r requirements.txt
+
+
+# Stage 2: Runtime image
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT = 80
+
+WORKDIR = /code
+
+COPY --from=builder /build/wheels /wheels
+RUN pip install --no-cache-dir --no-index  --find-links=/wheels /wheels/* \
+    && rm -rf /wheels
+
 
 # App code and needed artifacts
 COPY ./app ./app
