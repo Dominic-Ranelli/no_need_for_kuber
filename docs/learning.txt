@@ -4,7 +4,7 @@ I have not yet setup the toml file. I will do that now.
 
 Something interesting I learned in general upkeep, when making changes to code, I should run:
 Running on docker:
-docker build --no-cache -t myimage -f docker/Dockerfile .
+docker build --pull --no-cache -t myimage -f docker/Dockerfile .
 docker run -p 8080:80 myimage
 
 
