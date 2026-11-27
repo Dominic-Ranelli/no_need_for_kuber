@@ -5,4 +5,3 @@ Something I found useful in understanding is the USER instruction within the Doc
 I also found it interesting that one may copy multiple folders to the same folder in the container, although they might not be within the same folder locally.
 I found it challenging to identify what commands should be ran while the container is running vs those that may be ran on the base image.
 
- 
