@@ -14,6 +14,10 @@ uv pip compile pyproject.toml -o requirements.txt --generate-hashes
 View build steps:
 docker build --progress=plain -f docker/Dockerfile .
 
+To check if the app and models are available to a non-root user:
+docker run --rm -u appuser --entrypoint ls myimage -la ./app 
+docker run --rm -u appuser --entrypoint ls myimage -la ./models
+
 For tests:
 PYTHONPATH=. uv run pytest --cov=app --cov-report=term-missing
 
